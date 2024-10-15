@@ -77,9 +77,8 @@ red_greedy_switches = Dict{Tuple{Int,Int,Int}, Tuple{Vector{Any}, Vector{Float64
 
 #expected outage times for each vertex, depending on the MRT objective
 SAIDI_coverage_times = Dict{Int,Vector}()
-RT_coverage_times = Dict{Int,Vector}()## There are 18 components. I am currently only running for a single component. 
-
-for comp = 1:1 #can be multithreaded using @threads functionality as desired
+RT_coverage_times = Dict{Int,Vector}()
+for comp = 1:18 #can be multithreaded using @threads functionality as desired
     contracted_trees[(comp,contraction_threshold)] = contract_metatree(induced_subgraph(G_ns,C_ns[comp])[1],contraction_threshold)
     contracted_fw[(comp,contraction_threshold)] = floyd_warshall_shortest_paths(contracted_trees[(comp,contraction_threshold)])
     max_switches[(comp,contraction_threshold,length_threshold)] = max_switch_list(contracted_trees[(comp,contraction_threshold)],length_threshold,floyd_warshall_shortest_paths(contracted_trees[(comp,contraction_threshold)]))
