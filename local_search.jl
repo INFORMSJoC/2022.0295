@@ -147,9 +147,7 @@ function local_search_weighted_product(G,start_T,start_M,source,steps,out_comp,o
     results[:,3] = graph_results[:,3]/best_energy
     results[:,4] = graph_results[:,4]/best_product
     gr_df = DataFrame(out_comp = [comp for i = 1:size(results)[1]], iter = [out_iter for i = 1:size(results)[1]], RTime =graph_results[:,1],SAIDI =graph_results[:,2],Energy =graph_results[:,3],Product =graph_results[:,4])
-    outpath = string("/Users/swatig/Dropbox (MIT) Greensboro/","$out_comp","_iter_$out_iter",".csv")
-    CSV.write(outpath, gr_df,writeheader=false)
-    return [graph_results,results, T,finalM,trees]
+    outpath = string("output/","$out_comp","_iter_$out_iter",".csv")
+    CSV.write(outpath, gr_df,writeheader=true)
+    return [graph_results, results, T,finalM,trees]
 end
-
-

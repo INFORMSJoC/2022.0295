@@ -77,8 +77,12 @@ red_greedy_switches = Dict{Tuple{Int,Int,Int}, Tuple{Vector{Any}, Vector{Float64
 
 #expected outage times for each vertex, depending on the MRT objective
 SAIDI_coverage_times = Dict{Int,Vector}()
-RT_coverage_times = Dict{Int,Vector}()
+RT_coverage_times = Dict{Int,Vector}()
+
+
+## There are 18 components. I am currently only running for a single component. 
 for comp = 1:18 #can be multithreaded using @threads functionality as desired
+    println("running for component", comp) 
     contracted_trees[(comp,contraction_threshold)] = contract_metatree(induced_subgraph(G_ns,C_ns[comp])[1],contraction_threshold)
     contracted_fw[(comp,contraction_threshold)] = floyd_warshall_shortest_paths(contracted_trees[(comp,contraction_threshold)])
     max_switches[(comp,contraction_threshold,length_threshold)] = max_switch_list(contracted_trees[(comp,contraction_threshold)],length_threshold,floyd_warshall_shortest_paths(contracted_trees[(comp,contraction_threshold)]))
@@ -121,5 +125,36 @@ for comp = 1:18 #can be multithreaded using @threads functionality as desired
     IP_SAIDI_R_results[comp] = reconnection_cost(reduced_connectivity_matrices[comp],  lengths[comp],IP_solution_to_order(IP_SAIDI_results[comp][2]))
     IP_recon_S_results[comp] = SAIDI_cost(reduced_connectivity_matrices[comp], weights[comp], lengths[comp],IP_solution_to_order(IP_recon_results[comp][2]))
     SAIDI_coverage_times[comp] = vertex_coverage_time(contracted_graphs[comp],contracted_trees[(comp,contraction_threshold)],contracted_centers[comp],lengths[comp],contracted_connectivity_matrices[comp],IP_solution_to_order(IP_SAIDI_results[comp][2]),contracted_rows[comp],contracted_cols[comp])
-    RT_coverage_times[comp] = vertex_coverage_time(contracted_graphs[comp],contracted_trees[(comp,contraction_threshold)],contracted_centers[comp],lengths[comp],contracted_connectivity_matrices[comp],IP_solution_to_order(IP_recon_results[comp][2]),contracted_rows[comp],contracted_cols[comp])
+    RT_coverage_times[comp] = vertex_coverage_time(contracted_graphs[comp],contracted_trees[(comp,contraction_threshold)],contracted_centers[comp],lengths[comp],contracted_connectivity_matrices[comp],IP_solution_to_order(IP_recon_results[comp][2]),contracted_rows[comp],contracted_cols[comp]) 
+
 end
+
+# Convert and save IP_SAIDI_results
+IP_SAIDI_results_df = DataFrame([(k, v[1], v[2], v[3]) for (k, v) in IP_SAIDI_results], [:ID, :ObjectiveValue, :Matrix, :Vector])
+CSV.write("output/IP_SAIDI_results.csv", IP_SAIDI_results_df)
+
+# Convert and save IP_recon_results
+IP_recon_results_df = DataFrame([(k, v[1], v[2], v[3]) for (k, v) in IP_recon_results], [:ID, :ObjectiveValue, :Matrix, :Vector])
+CSV.write("output/IP_recon_results.csv", IP_recon_results_df)
+
+# Save the objective values
+IP_SAIDI_S_results_df = DataFrame([(k, v) for (k, v) in IP_SAIDI_S_results], [:ID, :SAIDIObjective])
+CSV.write("output/IP_SAIDI_S_results.csv", IP_SAIDI_S_results_df)
+
+IP_recon_R_results_df = DataFrame([(k, v) for (k, v) in IP_recon_R_results], [:ID, :RTimeObjective])
+CSV.write("output/IP_recon_R_results.csv", IP_recon_R_results_df)
+
+IP_SAIDI_R_results_df = DataFrame([(k, v) for (k, v) in IP_SAIDI_R_results], [:ID, :SAIDIObjectiveWithRTime])
+CSV.write("output/IP_SAIDI_R_results.csv", IP_SAIDI_R_results_df)
+
+IP_recon_S_results_df = DataFrame([(k, v) for (k, v) in IP_recon_S_results], [:ID, :RTimeObjectiveWithSAIDI])
+CSV.write("output/IP_recon_S_results.csv", IP_recon_S_results_df)
+
+# Save expected outage times
+SAIDI_coverage_times_df = DataFrame([(k, v) for (k, v) in SAIDI_coverage_times], [:ID, :SAIDITimes])
+CSV.write("output/SAIDI_coverage_times.csv", SAIDI_coverage_times_df)
+
+RT_coverage_times_df = DataFrame([(k, v) for (k, v) in RT_coverage_times], [:ID, :RTimes])
+CSV.write("output/RT_coverage_times.csv", RT_coverage_times_df)
+
+
