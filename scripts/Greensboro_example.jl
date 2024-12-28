@@ -80,7 +80,7 @@ SAIDI_coverage_times = Dict{Int,Vector}()
 RT_coverage_times = Dict{Int,Vector}()
 
 
-## There are 18 components. I am currently only running for a single component. 
+## There are 18 components. To run for a specific component, say X, change the for loop to go from X:X 
 for comp = 1:18 #can be multithreaded using @threads functionality as desired
     println("running for component", comp) 
     contracted_trees[(comp,contraction_threshold)] = contract_metatree(induced_subgraph(G_ns,C_ns[comp])[1],contraction_threshold)
